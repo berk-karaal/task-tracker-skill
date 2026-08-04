@@ -1,0 +1,6 @@
+{
+  "name": "task-tracker",
+  "version": "0.2.0",
+  "description": "Local-only persistent task tracking via .tasks/ docs and /task-tracker:* commands",
+  "author": { "name": "Berk Karaal" }
+}

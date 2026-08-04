@@ -1,0 +1,21 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Write(**/.tasks/**)",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/scripts/qmd-sync.sh\""
+          },
+          {
+            "type": "command",
+            "if": "Edit(**/.tasks/**)",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/scripts/qmd-sync.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}
