@@ -47,7 +47,10 @@ treat the task created here as the **active task** and auto-maintain its docs as
    ```
 
 8. **Update `.tasks/INDEX.md`:** if it is missing, create it from the `INDEX.md` skeleton.
-   Add (or update) the row for this task: id, title, `in-progress`, timestamp.
+   Add (or update) the row for this task: id, title, `in-progress`, timestamp, and `Source`
+   = `local`. The table is 5 columns (`ID | Title | Status | Last updated | Source`); if the
+   existing file still has the older 4-column form, migrate it, giving every existing row
+   `Source` = `local`.
 
 9. **qmd index (optional).** Only if the `qmd` CLI is installed (`command -v qmd`); skip
    this step silently otherwise:
