@@ -38,7 +38,24 @@ Persist what happened in this session into the tracked task's docs, following th
    If so, follow the skill's rule: update the affected sections, append a dated entry to
    task.md's `## Changelog`, and log the change as a milestone bullet in `progress.md`.
 
-6. **Bump `INDEX.md`:** update this task's `status` and `last-updated`.
+6. **Bump the INDEX.** Determine which INDEX owns this task:
+   ```bash
+   [ -L ".tasks/<id>" ] && REMOTE=$(cd ".tasks/<id>" && pwd -P)
+   ```
+   - Linked **and** `$REMOTE/../INDEX.md` exists → that origin INDEX is authoritative: update
+     this task's `status` and `last-updated` there, then copy the same two values into the
+     mirror row in the local `.tasks/INDEX.md`. Leave the local row's `Source` unchanged.
+   - Otherwise (local task, or linked with no origin INDEX) → update `status` and
+     `last-updated` in the local `.tasks/INDEX.md` as before.
 
 7. **Confirm** what you wrote (files touched, any new notes). Never `git add` or commit
    `.tasks/`.
+
+## Linked tasks
+
+A dangling link (`[ -L ".tasks/<id>" ]` true, `[ -d ".tasks/<id>" ]` false) is a hard stop:
+report the missing target, suggest `/task-tracker:unlink <id>`, and write nothing.
+
+If `.tasks/<id>` is a symlink, its docs live outside this project. Keep writing them through
+the `.tasks/<id>/...` path — never the resolved remote path — so the qmd re-index hook keeps
+firing. Everything else about this command is identical.

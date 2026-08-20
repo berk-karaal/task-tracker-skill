@@ -19,6 +19,13 @@ afterward:
 1. **Resolve the task.** Use `$ARGUMENTS` if given; else the active task; else read
    `.tasks/INDEX.md`, show it, and ask which task.
 
+   Then check whether it is linked:
+   ```bash
+   [ -L ".tasks/<id>" ] && cd ".tasks/<id>" && pwd -P
+   ```
+   A dangling link (`[ -L ]` true, `[ -d ]` false) is a hard stop: report the missing target
+   and suggest `/task-tracker:unlink <id>`. Write nothing.
+
 2. **Read, most-recent-relevant first:**
    - `.tasks/<id>/task.md` — the definition
    - `.tasks/<id>/progress.md` — the timeline + **Current status** / **Next action**
@@ -32,6 +39,9 @@ afterward:
 
 3. **Print a report** covering: the goal (1 line), what is **done**, what is **in
    progress**, what is **left**, and the **next action**. Cite note files where useful.
+
+   If the task is linked, add one line naming the remote path and whether an origin
+   `INDEX.md` governs its status. Keep addressing its files as `.tasks/<id>/...`.
 
 4. **Do not write, edit, or create any file.** No progress bullet, no notes, no INDEX
    change, no commit. This command is read-only by contract.

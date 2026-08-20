@@ -22,6 +22,8 @@ All commands are namespaced under the plugin, so they never collide with other p
 | `/task-tracker:update [id]` | Flush this session's work into the docs — dated `progress.md` bullets, detailed `notes/` files, INDEX bump. |
 | `/task-tracker:summary [id]` | **Read-only.** Print where the task stands AND prime the agent's context to resume. Writes nothing, so you can change direction. Use this on a fresh session to pick a task back up. |
 | `/task-tracker:list` | Show all tracked tasks and their status. |
+| `/task-tracker:link <path> [id]` | Link a task folder living **outside** this project into `.tasks/` (symlink) so every command works on it here. |
+| `/task-tracker:unlink <id>` | Detach a linked task — removes the symlink, INDEX row and qmd collection; the remote docs are untouched. |
 
 While a task is active, the bundled `task-tracking` skill auto-maintains the docs as the
 agent works (concise dated bullets, detail spun out to `notes/`).
@@ -30,7 +32,7 @@ agent works (concise dated bullets, detail spun out to `notes/`).
 
 ```
 .tasks/                              # git-ignored, local-only
-├─ INDEX.md                          # id · title · status · last-updated
+├─ INDEX.md                          # id · title · status · last-updated · source
 └─ <task-id>/
    ├─ task.md                        # goal · why · scope · acceptance criteria · links
    ├─ progress.md                    # thin dated timeline; links to notes/
@@ -52,6 +54,24 @@ agent works (concise dated bullets, detail spun out to `notes/`).
 # days later, fresh session:
 /task-tracker:summary PROJ-1234     # read-only resume: status + context
 ```
+
+## Tasks that live elsewhere
+
+A task started in one directory can be continued from another project, so you get that
+project's docs, skills, and agents while still writing to the task's own docs:
+
+```
+cd ~/Documents/project-a
+/task-tracker:link ~/Documents/task-director/.tasks/task-a
+/task-tracker:summary task-a     # read-only resume, reads the remote docs
+...work; updates are written to the remote folder...
+/task-tracker:unlink task-a      # done here; remote docs untouched
+```
+
+`.tasks/task-a` is a symlink to the remote folder, so every command, the `task-tracking`
+skill, and qmd search treat it exactly like a local task. If the remote folder belongs to
+another project's `.tasks/`, that project's `INDEX.md` stays the source of truth for the
+task's status; the local row mirrors it and records the remote path in its `Source` column.
 
 ## Optional: qmd search
 

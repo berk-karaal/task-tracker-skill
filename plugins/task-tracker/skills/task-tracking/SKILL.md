@@ -27,6 +27,42 @@ tracked task is active.
 `<task-id>` = ticket key + slug when a key exists (`PROJ-1234-add-auth`), else a kebab
 slug (`blog-redesign`).
 
+## Linked (remote) tasks
+
+`.tasks/<task-id>` may be a **symlink** to a task folder living outside this project (created
+by `/task-tracker:link`, removed by `/task-tracker:unlink`). Everything in this skill applies
+unchanged, because the address is the same either way: `.tasks/<task-id>/progress.md`,
+`.tasks/<task-id>/notes/`, `qmd query "..." -c <task-id>`.
+
+Detect it from the filesystem — there is no state file:
+
+```bash
+[ -L ".tasks/<task-id>" ]                    # linked?
+REMOTE=$(cd ".tasks/<task-id>" && pwd -P)    # where it really lives
+[ -f "$REMOTE/../INDEX.md" ]                 # belongs to another tasks root?
+```
+
+Resolve with `pwd -P` before looking at `..`: `cd .tasks/<task-id>/..` follows the *logical*
+path and lands in the local `.tasks/`, so it silently reads this project's INDEX instead of
+the origin's.
+
+- **INDEX authority.** When `$REMOTE/../INDEX.md` exists it owns this task's `status` and
+  `last-updated`; the local `.tasks/INDEX.md` row is a mirror refreshed from it, and its
+  `Source` column holds the remote absolute path. With no origin INDEX, the local row is the
+  only record.
+- **Always address a linked task through `.tasks/<task-id>/`, never its resolved remote
+  path.** The qmd re-index hook only fires for paths containing `/.tasks/`; writing by the
+  resolved path leaves the search index stale until the next write under `.tasks/`.
+- **Unlinking removes the symlink only** (`rm .tasks/<task-id>`), plus the local INDEX row
+  and the qmd collection. Never delete anything inside the remote folder, never use a
+  recursive delete on the link.
+- A dangling link (`[ -L ]` true, `[ -d ]` false) is a hard stop for every command: report it
+  and suggest `/task-tracker:unlink <task-id>`; change nothing.
+
+**Known limitations.** Two projects linking the same task keep independent qmd indexes (both
+work; each re-indexes on its own writes). Two sessions writing the same remote task at the
+same time can clobber each other — there is no locking.
+
 ## Timestamps — always from `date`, never guessed
 
 - In-doc timestamps + `INDEX.md` `last-updated`: `date '+%Y-%m-%d %H:%M'` → `2026-06-21 14:30`
@@ -57,7 +93,8 @@ detail belongs in `notes/`, not the intro.
 `file:line` references, dead ends. Real work done that should be recoverable in a later session goes here.
 Keep it granular, but do not let it bloat.
 
-**INDEX.md** — one row per task: id, title, status, last-updated. Status vocabulary:
+**INDEX.md** — one row per task: id, title, status, last-updated, source (`local`, or the
+remote absolute path for a linked task). Status vocabulary:
 `active` / `in-progress` / `paused` / `blocked` / `done`.
 
 ## Auto-maintenance (while a tracked task is active)
@@ -119,6 +156,9 @@ still in your context anyway.
 - Timestamps come from the real `date` command. Never invent them.
 - Never let `progress.md` bloat — detail belongs in `notes/`.
 - Never `git add` / commit / push `.tasks/`. It is local-only by design.
+- Address linked tasks through `.tasks/<task-id>/`, never their resolved remote path.
+- `/task-tracker:unlink` deletes the symlink only — never anything inside a remote task
+  folder, and never with a recursive delete.
 
 ## Canonical file skeletons
 
@@ -177,7 +217,8 @@ still in your context anyway.
 ```markdown
 # Tasks
 
-| ID        | Title   | Status      | Last updated       |
-| --------- | ------- | ----------- | ------------------ |
-| <task-id> | <title> | in-progress | <YYYY-MM-DD HH:MM> |
+| ID        | Title   | Status      | Last updated       | Source                |
+| --------- | ------- | ----------- | ------------------ | --------------------- |
+| <task-id> | <title> | in-progress | <YYYY-MM-DD HH:MM> | local                 |
+| <linked>  | <title> | in-progress | <YYYY-MM-DD HH:MM> | /abs/path/to/task-dir |
 ```
