@@ -34,6 +34,8 @@ check "update.md mentions origin INDEX" "grep -qi 'origin INDEX' '$CMD/update.md
 check "summary.md mentions linked"     "grep -qi 'linked' '$CMD/summary.md'"
 check "SKILL documents linked tasks"   "grep -qi 'linked task' '$SKILL'"
 check "SKILL forbids resolved path"    "grep -qi 'never its resolved' '$SKILL'"
+check "SKILL warns on logical parent"  "grep -q 'pwd -P' '$SKILL'"
+check "link.md resolves before .."     "grep -q 'REMOTE=\$(cd' '$CMD/link.md'"
 if grep -qF 'TASKS_DIR="${FILE%%/.tasks/*}/.tasks"' "$ROOT/plugins/task-tracker/scripts/qmd-sync.sh"
 then ok "qmd-sync.sh untouched by design"; else bad "qmd-sync.sh untouched by design"; fi
 
@@ -89,6 +91,13 @@ if command -v qmd >/dev/null 2>&1; then
 else
   echo "  skip qmd assertions (qmd not installed)"
 fi
+
+echo 'local-index-must-not-win' > "$PROJ/.tasks/INDEX.md"
+check "pwd -P reaches origin INDEX" \
+  "grep -q 'task-a' \"\$(cd '$PROJ/.tasks/task-a' && pwd -P)/../INDEX.md\""
+check "logical cd would read local" \
+  "( cd '$PROJ/.tasks/task-a/..' && grep -q 'local-index-must-not-win' INDEX.md )"
+rm "$PROJ/.tasks/INDEX.md"
 
 rm "$PROJ/.tasks/task-a"
 AFTER="$(cd "$REMOTE" && find . -type f -exec shasum {} + | sort)"

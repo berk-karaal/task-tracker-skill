@@ -42,6 +42,10 @@ REMOTE=$(cd ".tasks/<task-id>" && pwd -P)    # where it really lives
 [ -f "$REMOTE/../INDEX.md" ]                 # belongs to another tasks root?
 ```
 
+Resolve with `pwd -P` before looking at `..`: `cd .tasks/<task-id>/..` follows the *logical*
+path and lands in the local `.tasks/`, so it silently reads this project's INDEX instead of
+the origin's.
+
 - **INDEX authority.** When `$REMOTE/../INDEX.md` exists it owns this task's `status` and
   `last-updated`; the local `.tasks/INDEX.md` row is a mirror refreshed from it, and its
   `Source` column holds the remote absolute path. With no origin INDEX, the local row is the

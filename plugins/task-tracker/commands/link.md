@@ -43,10 +43,18 @@ Never copy the remote docs, and never modify anything in the remote folder durin
    ln -s "$ABS" ".tasks/<id>"
    ```
 
-5. **Detect the origin tasks root.** If `.tasks/<id>/../INDEX.md` exists, the remote folder
-   belongs to another tasks root and that `INDEX.md` is **authoritative** for this task's
-   status and last-updated. Read the task's row from it. If it does not exist, read
-   **Current status** from the remote `progress.md` intro instead.
+5. **Detect the origin tasks root.** Resolve the real location first, then look next to it:
+   ```bash
+   REMOTE=$(cd ".tasks/<id>" && pwd -P)
+   [ -f "$REMOTE/../INDEX.md" ]
+   ```
+   Always go through `pwd -P`. `cd .tasks/<id>/..` lands in the **local** `.tasks/`, not the
+   remote parent, so it would read the wrong INDEX.
+
+   If that file exists, the remote folder belongs to another tasks root and its `INDEX.md`
+   is **authoritative** for this task's status and last-updated — read the task's row from
+   it. If it does not exist, read **Current status** from the remote `progress.md` intro
+   instead.
 
 6. **Get the timestamp:** `date '+%Y-%m-%d %H:%M'`.
 
