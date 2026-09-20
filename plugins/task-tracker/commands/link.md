@@ -74,8 +74,11 @@ Never copy the remote docs, and never modify anything in the remote folder durin
      cd ..
    fi
    ```
-   Then run `cd .tasks && qmd update && qmd embed` as a **background** Bash task
-   (`run_in_background: true`). Do not wait for it. qmd stores the resolved remote path, so
+   Then kick the first index build without blocking:
+   ```bash
+   (cd .tasks && nohup sh -c 'qmd update && qmd embed' >>.qmd/sync.log 2>&1 &)
+   ```
+   Do not wait for it. qmd stores the resolved remote path, so
    notes written directly in the remote folder are indexed too.
 
 9. **Confirm:** report the id, the remote path, whether an origin `INDEX.md` governs its

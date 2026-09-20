@@ -1,16 +1,25 @@
 # task-tracker
 
-A local-only Claude Code plugin for **persistent task tracking**. Keeps long-running
+A local-only Claude Code and OpenCode V2 plugin for **persistent task tracking**. Keeps long-running
 tasks (work that spans days, sessions, or context resets) recoverable, by maintaining a
 small set of markdown docs under `.tasks/` in each project. The docs are **never committed
 or pushed** — they exist only for you and your coding agent, locally.
 
-## Install
+## Install in Claude Code
 
-```
+```text
 /plugin marketplace add berk-karaal/task-tracker-skill
 /plugin install task-tracker@task-tracker-skill
 ```
+
+## Install in OpenCode V2
+
+```sh
+opencode plugin add github:berk-karaal/task-tracker-skill
+```
+
+Restart the client after installation. Both packages register the same commands, skill, and
+qmd sync behavior automatically.
 
 ## Commands
 
@@ -80,7 +89,7 @@ task's docs into a local search engine at `.tasks/.qmd/` (git-ignored, like ever
 else under `.tasks/`):
 
 - `/task-tracker:init` creates a per-task collection automatically.
-- A plugin hook re-indexes in the background after task docs change — debounced, never
+- A Claude Code or OpenCode V2 tool hook re-indexes after task docs change — debounced, never
   blocking.
 - Agents search with `qmd query "<question>" -c <task-id>` (hybrid semantic search)
   after checking `progress.md`, and read the full matched note files.

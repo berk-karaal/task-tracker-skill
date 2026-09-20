@@ -1,0 +1,28 @@
+{
+  "name": "opencode-task-tracker",
+  "version": "0.4.0",
+  "description": "Local-only persistent task tracking for OpenCode V2",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "index.ts",
+    "src/",
+    "plugins/task-tracker/commands/",
+    "plugins/task-tracker/skills/",
+    "plugins/task-tracker/scripts/"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "npm run typecheck && bash test/smoke-remote-link.sh && node --test test/plugin.test.mjs"
+  },
+  "dependencies": {
+    "@opencode/plugin": "^2.0.11"
+  },
+  "devDependencies": {
+    "@types/json-schema": "^7.0.15",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.2"
+  }
+}

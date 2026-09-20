@@ -1,6 +1,6 @@
 {
   "name": "task-tracker-skill",
-  "description": "Berk's personal Claude Code plugins. Hosts task-tracker, a local-only persistent task-tracking plugin.",
+  "description": "Berk's task-tracker plugin for Claude Code and OpenCode.",
   "owner": { "name": "Berk Karaal" },
   "plugins": [
     {
