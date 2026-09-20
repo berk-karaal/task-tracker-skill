@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PostToolUse hook target for the task-tracker plugin.
+# Claude Code and OpenCode post-tool hook target for the task-tracker plugin.
 # Debounced background qmd re-index of .tasks/ docs. Reads hook JSON on stdin.
 # Contract: ALWAYS exit 0 fast; heavy work happens detached; silent no-op
 # without qmd or without a .tasks/.qmd index.

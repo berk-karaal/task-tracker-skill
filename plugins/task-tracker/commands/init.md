@@ -62,9 +62,11 @@ treat the task created here as the **active task** and auto-maintain its docs as
      cd ..
    fi
    ```
-   Then kick the first index build without blocking: run
-   `cd .tasks && qmd update && qmd embed` as a **background** Bash task
-   (`run_in_background: true`). Do not wait for it or report its output; search falls
+   Then kick the first index build without blocking:
+   ```bash
+   (cd .tasks && nohup sh -c 'qmd update && qmd embed' >>.qmd/sync.log 2>&1 &)
+   ```
+   Do not wait for it or report its output; search falls
    back to BM25 until embeddings land.
 
 10. **Confirm:** tell the user the task id, the files created, and that `.tasks/` is

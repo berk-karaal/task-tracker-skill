@@ -7,13 +7,26 @@ set -u
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CMD="$ROOT/plugins/task-tracker/commands"
 SKILL="$ROOT/plugins/task-tracker/skills/task-tracking/SKILL.md"
+PLUGIN="$ROOT/src/index.ts"
 FAILS=0
 
 ok()   { printf '  ok   %s\n' "$1"; }
 bad()  { printf '  FAIL %s\n' "$1"; FAILS=$((FAILS + 1)); }
 check(){ if eval "$2" >/dev/null 2>&1; then ok "$1"; else bad "$1"; fi; }
 
-echo "== A. doc invariants =="
+echo "== A. dual-plugin + doc invariants =="
+check "Claude marketplace exists"         "[ -f '$ROOT/.claude-plugin/marketplace.json' ]"
+check "Claude plugin manifest exists"     "[ -f '$ROOT/plugins/task-tracker/.claude-plugin/plugin.json' ]"
+check "Claude qmd hook exists"            "grep -q 'PostToolUse' '$ROOT/plugins/task-tracker/hooks/hooks.json'"
+check "package versions match"            "[ \"\$(jq -r .version '$ROOT/package.json')\" = \"\$(jq -r .version '$ROOT/plugins/task-tracker/.claude-plugin/plugin.json')\" ]"
+check "release skills match"              "cmp -s '$ROOT/.claude/skills/release/SKILL.md' '$ROOT/.opencode/skills/release/SKILL.md'"
+check "V2 package manifest exists"       "[ -f '$ROOT/package.json' ]"
+check "V2 plugin dependency declared"    "grep -q '\"@opencode/plugin\"' '$ROOT/package.json'"
+check "V2 Plugin.define entrypoint"       "grep -q 'Plugin.define' '$PLUGIN'"
+check "commands registered by transform" "grep -q 'ctx.command.transform' '$PLUGIN'"
+check "skill registered by transform"    "grep -q 'ctx.skill.transform' '$PLUGIN'"
+check "qmd uses post-tool hook"           "grep -q 'ctx.tool.hook(\"execute.after\"' '$PLUGIN'"
+check "commands retain namespace"         "grep -q 'task-tracker:\${command.name}' '$PLUGIN'"
 check "link.md exists"                 "[ -f '$CMD/link.md' ]"
 check "link.md disables model invoke"  "grep -q '^disable-model-invocation: true$' '$CMD/link.md'"
 check "link.md has argument-hint"      "grep -q '^argument-hint:' '$CMD/link.md'"
